@@ -4,16 +4,29 @@
 \alias{r5r_gui}
 \title{Run the r5rgui Shiny Application}
 \usage{
-r5r_gui(r5r_network, center = NULL, zoom = NULL, departure_date = Sys.Date())
+r5r_gui(
+  r5r_network,
+  center = NULL,
+  zoom = NULL,
+  departure_date = Sys.Date(),
+  mode = c("WALK", "TRANSIT"),
+  basemaps = list(Positron = mapgl::carto_style("positron"), `Dark Matter` =
+    mapgl::carto_style("dark-matter"), Voyager = mapgl::carto_style("voyager"))
+)
 }
 \arguments{
-\item{r5r_network}{A pre-built 'r5r' network object. This object contains the street and transit network data required for routing calculations.}
+\item{r5r_network}{A pre-built 'r5r' network object, or a named list of such objects for comparison.
+If a list is provided, the list names will be used as labels in the GUI. If a single object is provided, its variable name will be used as the label.}
 
 \item{center}{A numeric vector of length 2, specifying the initial longitude and latitude for the map's center. If \code{NULL} (the default), the map will be centered on the bounding box of the \code{r5r_network}. If \code{{r5r}} is below version 2.4.0, calculating the bounding box may be slow.}
 
 \item{zoom}{An integer specifying the initial zoom level of the map. If \code{NULL} (the default), the zoom level will be automatically calculated to fit the bounding box of the \code{r5r_network}. If \code{{r5r}} is below version 2.4.0, calculating the bounding box may be slow.}
 
 \item{departure_date}{A Date object specifying the initial departure date for the trip. Defaults to the current system date.}
+
+\item{mode}{A character vector specifying the initial transport modes. This is passed directly to the \code{mode} argument in \link[r5r:detailed_itineraries]{detailed_itineraries()} (and other functions of \code{\link[r5r:r5r]{r5r}}). Defaults to \code{c("WALK", "TRANSIT")}.}
+
+\item{basemaps}{A named list of MapLibre style URLs (or style generator functions like \code{\link[mapgl:carto_style]{mapgl::carto_style()}}). The names are used in the GUI selector. Defaults to a set of Carto styles (Voyager, Positron, Dark Matter). See \href{https://walker-data.com/mapgl/reference/index.html#styling-helpers}{mapgl styling helpers} for options.}
 }
 \value{
 This function does not return a value; it launches a Shiny application.
@@ -39,9 +52,17 @@ if (interactive()) {
   # Launch with a specific departure date with auto-zoom and center
   r5r_gui(r5r_network, departure_date = as.Date("2019-05-13"))
 
+  # Launch with specific transport modes
+  r5r_gui(r5r_network, mode = c("WALK", "BUS"))
+
   # Manually define map center and zoom
   map_center <- c(-51.22, -30.05)
   map_zoom <- 11
   r5r_gui(r5r_network, center = map_center, zoom = map_zoom)
+
+  # Compare two networks
+  # Note: For this example, we use the same network object twice.
+  # In a real scenario, you would use two different networks (e.g. current vs future).
+  r5r_gui(list("Baseline" = r5r_network, "Scenario A" = r5r_network))
 }
 }
